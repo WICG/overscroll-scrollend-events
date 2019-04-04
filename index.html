@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>overscroll and scrollend events</title>
+    <link rel="stylesheet" type="text/css" href="https://w3c.github.io/uievents/spec-WD.css">
+    <script src='https://www.w3.org/Tools/respec/respec-w3c-common.js' class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {
+        specStatus: "CG-DRAFT",
+        editors: [{
+          name:        "Sahel Sharify",
+          url:         "https://github.com/sahel-sh",
+          company:     "Google",
+          companyURL:  "https://www.google.com/"
+        },{
+          name:        "Navid Zolghadr",
+          url:         "https://github.com/NavidZ",
+          company:     "Google",
+          companyURL:  "https://www.google.com/"
+        }],
+        shortName: "overscroll-scrollend-events",
+        otherLinks: [{
+          key: 'Participation',
+          data: [
+              {
+                value: 'GitHub repository',
+                href: 'https://github.com/NavidZ/overscroll-scrollend-events/'
+              } ,{
+                value: 'File a bug / view open issues',
+                href: 'https://github.com/NavidZ/overscroll-scrollend-events/issues'
+              }
+            ]
+          }],
+      };
+    </script>
+  </head>
+  <body>
+    <section id='abstract'>
+      <p>The new scroll events introduced in this document provides web developers a way to listen to the state of the scrolling
+      and when their content is being overscrolled or when the scrolling has finished.
+      This information will be useful for the effects such as pull to refresh or history swipe navigations in the web apps.</p>
+    </section>
+
+    <section id='intro' class='informative'>
+      <h2>Introduction</h2>
+
+      <p>With <a href="https://drafts.csswg.org/css-overscroll-behavior/">CSS overscroll behavior property</a> developers can
+      prevent user-agent defined <a href="https://drafts.csswg.org/css-overscroll-behavior/#boundary-default-action">default boundary actions</a>.
+      Overscroll affordance (e.g. rubber-banding or glow effect), pull to refresh, and history swipe navigation are examples of default boundary actions.</p> 
+
+      <p>Overscroll behavior property lets developers to prevent default aformentioned boundary actions.
+      However in order to implement customized behaviors, they still need to register a combination of scroll, touch, wheel event listeners
+      to find out when overscrolling has started and trigger their customized scroll boundary behavior.
+      This approach has the following disadvantages/limitations:
+
+      <ul>
+      <li>Needs to be implemented for different methods of scrolling separately (touchscreen, wheel, keyboard, etc.)</li>
+      <li>If the developer wants to trigger overscroll animation at the end of the scroll gesture, touchend event listener can be used for touchscreen scrolling.
+      However for other methods of scrolling (e.g. touchpad scrolling) this won’t be possible using the currently existing events.</li>
+      <li>In presence of a cross origin iframe the embedder that might get scrolled might not get the touchmove/wheel events at all.</li>
+      </ul>
+
+    </section>
+    <section dfn-for="InputDeviceCapabilities">
+      <h2>The <code>overscroll</code> and <code>scrollend</code> events</h2>
+      <p>To simplify overscroll behavior customization we propose firing overscroll and scrollend events.</p>
+
+      <p>User agents MUST fire an <code>overscroll</code> event to the scrolling element when it reaches its scrolling extent.
+      In this case the <code>target</code> of such event will be the scrolling element.
+      When no element has consumed any delta in the current scroll sequence the <code>target</code> will be the last element in scroll chain.
+      In the presence of an element with <code>overscroll-behavior-x|y</code> <span>&#8800;</span> <code>auto</code> the scroll chain is cut
+      and that element will be the last element in the cut chain and get the <code>overscroll</code> event.</p>
+
+      <p>User agents MUST fire an <code>scrollend</code> event to the scrolled element indicating that the scroll sequence has ended
+      and any scroll offset changes has been applied (i.e. any active scroll animation has completed).
+      When no element has scrolled during the current scroll sequence the <code>scrollend</code> will get sent to the <code>overscroll</code> event's <code>target</code>.</p>
+
+      <pre class="idl no-link-warnings">
+dictionary OverscrollEventInit : EventInit {
+  double deltaX = 0.0;
+  double deltaY = 0.0;
+};
+interface OverscrollEvent : Event {
+    readonly attribute double deltaX;
+    readonly attribute double deltaY;
+};
+      </pre>
+      <div class="event-definition">
+        <dl>
+          <dt id="event-type-overscroll"><dfn data-dfn-type="dfn" id="dfn-overscroll"><a class="eventtype" href="#event-type-overscroll"><code>overscroll</code></a></dfn></dt>
+          <dd>
+            <table class='old_css_table' data-summary="This table contains information about the semantics of the given event type">
+              <tbody>
+                <tr>
+                  <th>Type</th>
+                  <td><strong><code>overscroll</code></strong></td>
+                </tr>
+                <tr>
+                  <th>Interface</th>
+                  <td>OverscrollEvent</td>
+                </tr>
+                <tr>
+                  <th>Sync / Async</th>
+                  <td>Async</td>
+                </tr>
+                <tr>
+                  <th>Bubbles</th>
+                  <td>Yes if the target is Document</td>
+                </tr>
+                <tr>
+                  <th>Trusted Targets</th>
+                  <td><code>Element, Document</code></td>
+                </tr>
+                <tr>
+                  <th>Cancelable</th>
+                  <td>No</td>
+                </tr>
+                <tr>
+                  <th>Composed</th>
+                  <td>Yes</td>
+                </tr>
+                <tr>
+                  <th>Default action</th>
+                  <td>None</td>
+               </tr>
+              </tbody>
+            </table>
+          </dd>
+        </dl>
+      </div>
+      <div class="event-definition">
+        <dl>
+          <dt id="event-type-srollend"><dfn data-dfn-type="dfn" id="dfn-scrollend"><a class="eventtype" href="#event-type-scrollend"><code>scrollend</code></a></dfn></dt>
+          <dd>
+            <table class='old_css_table' data-summary="This table contains information about the semantics of the given event type">
+              <tbody>
+                <tr>
+                  <th>Type</th>
+                  <td><strong><code>scrollend</code></strong></td>
+                </tr>
+                <tr>
+                  <th>Interface</th>
+                  <td><a href="https://dom.spec.whatwg.org/#event">Event</a></td>
+                </tr>
+                <tr>
+                  <th>Sync / Async</th>
+                  <td>Async</td>
+                </tr>
+                <tr>
+                  <th>Bubbles</th>
+                  <td>Yes if the target is Document</td>
+                </tr>
+                <tr>
+                  <th>Trusted Targets</th>
+                  <td><code>Element, Document</code></td>
+                </tr>
+                <tr>
+                  <th>Cancelable</th>
+                  <td>No</td>
+                </tr>
+                <tr>
+                  <th>Composed</th>
+                  <td>Yes</td>
+                </tr>
+                <tr>
+                  <th>Default action</th>
+                  <td>None</td>
+               </tr>
+              </tbody>
+            </table>
+          </dd>
+        </dl>
+      </div>
+      <p>Note that similar to <a href="https://www.w3.org/TR/cssom-view/#scrolling-events"><code>scroll</code></a> event,
+      <code>overscroll</code> and <code>scrollend</code> events bubble if fired at document.
+      Similarly the <code>overscroll</code> and <code>scrollend</code> events are async, non-cancelable, and do not have any default actions.
+      To prevent default boundary actions developers must use <a href="https://drafts.csswg.org/css-overscroll-behavior/">CSS overscroll behavior property</a>.</p>
+    </section>
+
+    <section>
+        <h2>Extensions to the <code>GlobalEventHandlers</code> interface</h2>
+        <div>
+            <p>The following section describes extensions to the existing <code>GlobalEventHandlers</code> interface, defined in [[!HTML5]], to facilitate the event handler registration.</p>
+            <pre class="idl">
+partial interface GlobalEventHandlers {
+    attribute EventHandler onoverscroll;
+    attribute EventHandler onscrollend;
+};
+            </pre>
+            <dl dfn-for="GlobalEventHandlers" link-for="GlobalEventHandlers">
+                <dt><dfn>onoverscroll</dfn></dt>
+                <dd>
+                    The event handler IDL attribute (see [[!HTML5]]) for the <code>overscroll</code> event type.
+                </dd>
+            </dl>
+            <dl dfn-for="GlobalEventHandlers" link-for="GlobalEventHandlers">
+                <dt><dfn>onscrollend</dfn></dt>
+                <dd>
+                    The event handler IDL attribute (see [[!HTML5]]) for the <code>scrollend</code> event type.
+                </dd>
+            </dl>
+        </div>
+    </section>
+  </body>
+</html>
