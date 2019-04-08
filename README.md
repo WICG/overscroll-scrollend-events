@@ -7,6 +7,7 @@ If incubation around this API is successful (e.g. is shipped by multiple browser
 * [Chromium bug](https://bugs.chromium.org/p/chromium/issues/detail?id=907601)
 * [CSS spec issue](https://github.com/w3c/csswg-drafts/issues/3801)
 * [Chrome platform status](https://www.chromestatus.com/feature/5650553247891456)
+* [WICG discourse](https://discourse.wicg.io/t/proposal-new-events-for-overscroll-and-scrollend/3481)
 
 ## Status
 * This feature is now implemented behind Chrome "Experimental Web Platform features" flag.
