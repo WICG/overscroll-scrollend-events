@@ -1,5 +1,6 @@
  {
     "group":      ["80485"]
 ,   "contacts":   ["nzolghadr"]
-,   "shortName":  "overscroll-scrollend-events"
+,   "shortName":  "overscroll-scrollend-events",
+    "repo-type": "cg-report"
 }
