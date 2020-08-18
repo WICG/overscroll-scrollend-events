@@ -81,6 +81,7 @@ dictionary OverscrollEventInit : EventInit {
   double deltaX = 0.0;
   double deltaY = 0.0;
 };
+[Exposed=Window]
 interface OverscrollEvent : Event {
     readonly attribute double deltaX;
     readonly attribute double deltaY;
